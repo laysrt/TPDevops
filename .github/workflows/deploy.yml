@@ -1,39 +1,39 @@
-name: Deploy to Vercel
+name: Déploiement vers Vercel
 
+# Condition de déclenchement
 on:
   push:
     branches:
-      - main
+      - main # Déclenchement sur la branche principale (main)
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+		# Etapes
     steps:
-      # 1. Récupérer le code
-      - name: Checkout
-        uses: actions/checkout@v3
+    # 1. Checkout du code source
+    - name: Checkout du code
+      uses: actions/checkout@v3
 
-      # 2. Node stable
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+    # 2. Installation de Node.js et des dépendances
+    - name: Installation de Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '24' # Remplacez par la version Node.js utilisée par votre projet
+        cache: 'npm'
 
-      # 3. Installer Vercel CLI
-      - name: Install Vercel CLI
-        run: npm install -g vercel
+    - name: Installation des dépendances
+      run: npm install
 
-      # 4. Pull config Vercel
-      - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    # 3. Construire l'application React
+    - name: Build de l'application
+      run: npm run build
 
-      # 5. Build projet
-      - name: Build
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      # 6. Deploy
-      - name: Deploy
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+    # 4. Déployer sur Vercel
+    - name: Déploiement
+      env:
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      run: |
+        npm install -g vercel
+        vercel --prod --token $VERCEL_TOKEN --yes
